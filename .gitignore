@@ -1,3 +1,4 @@
 baebot-env/
 data/
 __pycache__/
+env.sh

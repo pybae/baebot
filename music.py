@@ -1,3 +1,5 @@
+import os, sys
+import lyricsgenius
 from mutagen.mp3 import MP3
 from pathlib import Path
 from fuzzywuzzy import fuzz
@@ -5,6 +7,15 @@ from fuzzywuzzy import fuzz
 # per ID3: https://en.wikipedia.org/wiki/ID3
 TITLE = 'TIT2'
 ARTIST = 'TPE1'
+
+genius_token = os.getenv('GENIUS_TOKEN')
+if genius_token:
+    print("Initializing baebot with Genius token: " + genius_token)
+else:
+    print("No GENIUS_TOKEN found. Set GENIUS_TOKEN and retry")
+    sys.exit()
+
+genius = lyricsgenius.Genius(genius_token)
 
 song_db = {}
 
@@ -41,4 +52,6 @@ def search_songs(query):
         return closest_by_title + (song_db[closest_by_title],)
     return closest_by_artist + (song_db[closest_by_artist],)
 
-search_songs("BAD BOY")
+def find_lyrics(title, artist=""):
+    song = genius.search_song(title, artist)
+    return song.lyrics

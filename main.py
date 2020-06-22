@@ -2,7 +2,7 @@ from discord.ext import commands
 import discord
 from discord import opus
 from discord import FFmpegOpusAudio
-from music import search_songs
+from music import search_songs, find_lyrics
 import ctypes
 import os
 
@@ -52,6 +52,18 @@ async def resume(ctx):
         await ctx.send('Resuming')
     else:
         await ctx.send('No track is paused')
+
+@bot.command(help="Searches for lyrics with the specified title and artist")
+async def lyrics(ctx, title, artist=""):
+    lyrics = find_lyrics(title, artist)
+
+    break_index = lyrics.find('\n\n')
+    while break_index != -1:
+        chunk = "```" + lyrics[:break_index] + "```"
+        lyrics = lyrics[break_index + 2:]
+        break_index = lyrics.find('\n\n')
+        await ctx.send(chunk)
+    await ctx.send("```" + lyrics + "```")
 
 @bot.event
 async def on_ready():
