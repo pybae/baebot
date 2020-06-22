@@ -57,13 +57,24 @@ async def resume(ctx):
 async def lyrics(ctx, title, artist=""):
     lyrics = find_lyrics(title, artist)
 
-    break_index = lyrics.find('\n\n')
-    while break_index != -1:
+    break_index = lyrics.find('\n\n', 1000)
+    while break_index != -1 and len(lyrics) > 1500:
         chunk = "```" + lyrics[:break_index] + "```"
         lyrics = lyrics[break_index + 2:]
         break_index = lyrics.find('\n\n')
         await ctx.send(chunk)
     await ctx.send("```" + lyrics + "```")
+
+@bot.command(help="Deletes the most recent n messages")
+async def clean(ctx, n):
+    n = int(n)
+    i, to_be_deleted = 0, []
+    for message in bot.cached_messages:
+        if bot.user == message.author:
+            to_be_deleted.append(message)
+    for message in to_be_deleted[::-1][:n]:
+        await message.delete()
+    await ctx.send("Deleted last " + str(n) + " messages")
 
 @bot.event
 async def on_ready():
