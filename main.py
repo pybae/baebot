@@ -23,8 +23,13 @@ def get_voice_client():
 
 @bot.command(help="Searches for and plays a song by title or artist")
 async def play(ctx, arg):
-    voice_channel = bot.get_channel(570805084087255071)
-    voice_client = await voice_channel.connect()
+    voice_client = get_voice_client()
+    if not voice_client:
+        voice_channel = bot.get_channel(570805084087255071)
+        voice_client = await voice_channel.connect()
+    elif voice_client.is_playing():
+        voice_client.pause()
+
     (song, artist, file_path) = search_songs(arg)
     await ctx.send('Now playing {} by {}'.format(song, artist))
     audio_source = await FFmpegOpusAudio.from_probe(file_path, method='fallback')
