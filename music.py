@@ -1,4 +1,5 @@
 import os, sys
+import random
 import lyricsgenius
 from mutagen.mp3 import MP3
 from pathlib import Path
@@ -51,6 +52,11 @@ def search_songs(query):
     if (max_title_score >= max_artist_score):
         return closest_by_title + (song_db[closest_by_title],)
     return closest_by_artist + (song_db[closest_by_artist],)
+
+def random_song():
+    title, artist = random.choice(list(song_db.keys()))
+    path = song_db[(title, artist)]
+    return (title, artist, path)
 
 def find_lyrics(title, artist=""):
     song = genius.search_song(title, artist)

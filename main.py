@@ -2,7 +2,7 @@ from discord.ext import commands
 import discord
 from discord import opus
 from discord import FFmpegOpusAudio
-from music import search_songs, find_lyrics
+from music import random_song, search_songs, find_lyrics
 import ctypes
 import os
 
@@ -14,14 +14,12 @@ else:
     sys.exit()
 
 bot = commands.Bot(command_prefix='$')
-
 discord.opus.load_opus("libopus.so.0")
-print(discord.opus.is_loaded())
 
 def get_voice_client():
     return bot.voice_clients[0] if len(bot.voice_clients) > 0 else None
 
-@bot.command(help="Searches for and plays a song by title or artist")
+@bot.command(help="Searches for and plays a song by title or artist. $play random will play a random song")
 async def play(ctx, arg):
     voice_client = get_voice_client()
     if not voice_client:
@@ -30,7 +28,11 @@ async def play(ctx, arg):
     elif voice_client.is_playing():
         voice_client.pause()
 
-    (song, artist, file_path) = search_songs(arg)
+    song, artist, file_path = None, None, None
+    if 'random' == arg.lower():
+        (song, artist, file_path) = random_song()
+    else:
+        (song, artist, file_path) = search_songs(arg)
     await ctx.send('Now playing {} by {}'.format(song, artist))
     audio_source = await FFmpegOpusAudio.from_probe(file_path, method='fallback')
     voice_client.play(audio_source)
@@ -61,7 +63,7 @@ async def lyrics(ctx, title, artist=""):
     while break_index != -1 and len(lyrics) > 1500:
         chunk = "```" + lyrics[:break_index] + "```"
         lyrics = lyrics[break_index + 2:]
-        break_index = lyrics.find('\n\n')
+        break_index = lyrics.find('\n\n', 1000)
         await ctx.send(chunk)
     await ctx.send("```" + lyrics + "```")
 
